@@ -1,7 +1,7 @@
 const express = require("express")
 const dotenv= require("dotenv");
 const { createTodo, updateTodo } = require("./types");
-const mongoose=require("mongoose");
+const { todo } = require("./db");
 
 dotenv.config()
 const PORT= process.env.PORT;
@@ -9,16 +9,13 @@ const PORT= process.env.PORT;
 const app=express();
 app.use(express.json())
 
-const mongourl=process.env.MONGO_DB
-mongoose.connect(mongourl)
-
 // body {
 // title: string;
 // description: string
 // }
 
 
-app.post("/todo", function(req,res) {
+app.post("/todo", async function(req,res) {
     const createPayload = req.body;
     const parsePayload= createTodo.safeParse(createPayload);
 
@@ -28,24 +25,26 @@ app.post("/todo", function(req,res) {
         })
         return;
     }
-    // put it in mongodb
-    const todo = new User({
-        title:title,
-        description:description
+    await todo.create({
+        title:createPayload.title,
+        description:createPayload.description,
+        completed:false
+    })
+    res.json({
+        "msg":"TODO created"
     });
+})
 
-    todo.save();
+app.get("/todos", async function (req,res) {
+    const todos = await todo.find({});
+    console.log(todos); // promise
 
     res.json({
-        "msg":"TODO list added"
-    });
+        todos: []
+    })
 })
 
-app.get("/todos", function (req,res) {
-    
-})
-
-app.put("/completed", function(req,res) {
+app.put("/completed", async function(req,res) {
     const updatePayload=req.body;
     const parsePayload=updateTodo.safeParse(updatePayload);
 
@@ -55,6 +54,17 @@ app.put("/completed", function(req,res) {
         })
         return;
     }
+
+    await todo.update({
+        _id : req.update.id
+    },
+    {
+        completed:true
+    })
+
+    res.json({
+        "msg":"TODO updated / marked as completed"
+    });
 })
 
 app.listen(PORT, (req,res) => {
