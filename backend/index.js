@@ -2,13 +2,14 @@ const express = require("express")
 const dotenv= require("dotenv");
 const { createTodo, updateTodo } = require("./types");
 const { todo } = require("./db");
+const cors = require("cors");
 
 dotenv.config()
 const PORT= process.env.PORT;
 
 const app=express();
 app.use(express.json())
-
+app.use(cors());
 // body {
 // title: string;
 // description: string

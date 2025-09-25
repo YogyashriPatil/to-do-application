@@ -15,7 +15,6 @@ export function CreateTodo()
             padding: 10,
             margin:10
         }}> Add a To-Do</button>
-
     </div>
 }
 
